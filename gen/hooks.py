@@ -14,6 +14,7 @@ _annotations = {
     "bool": "bool",
     "rev::CANError": "CANError",
     "std::vector<uint8_t>": "typing.List[int]",
+    "std::vector<uint8_t >": "typing.List[int]",
     "std::string": "str",
     "void": "None",
 }

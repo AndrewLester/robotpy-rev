@@ -7,11 +7,14 @@ class {{ enum.name }}(enum.Enum):
 {% endmacro -%}
 
 import enum
+from collections import namedtuple
 
-class ExternalFollower(enum.Enum);
-    kFollowerDisabled = (0, 0)
-    kFollowerSparkMax = (0x2051800, 26)
-    kFollowerPhoenix = (0x2040080, 27)
+
+class ExternalFollower(enum.Enum):
+    ExternalFollower = namedtuple('ExternalFollower', 'arbId configId')
+    kFollowerDisabled = ExternalFollower(0, 0)
+    kFollowerSparkMax = ExternalFollower(0x2051800, 26)
+    kFollowerPhoenix = ExternalFollower(0x2040080, 27)
 
 {% for header in headers %}
 {% for enum in header.enums %}

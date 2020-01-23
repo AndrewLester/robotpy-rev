@@ -5,9 +5,67 @@
 
 import typing
 
-from notifydict import NotifyDict
 import hal
 from .sim_enums import *
+
+class NotifyDict(dict):
+    """
+        Allows us to listen to changes in the dictionary --
+        note that we don't wrap everything, because for our
+        purposes we don't care about the rest
+        We only use these for some keys in the hal_data dict,
+        as not all keys are useful to listen to
+    """
+
+    __slots__ = ["cbs"]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.cbs = {}
+
+    def register(self, k, cb, notify=False):
+        """
+            register a function to be called when an item is set
+            with in this dictionary. We raise a key error if the
+            key passed is not a key that the dictionary contains.
+            :param k:        Key to be registered for call back. The key must be a
+                             valid key with in the dictionary
+            :param cb:       Function to be called if k is set. This function needs
+                             to take at least 2 parameters
+            :param notify:   Calls the function cb after registering k
+        """
+        if k not in self:
+            raise KeyError("Cannot register for non-existant key '%s'" % k)
+        self.cbs.setdefault(k, []).append(cb)
+        if notify:
+            cb(k, self[k])
+
+    def __setitem__(self, k, v):
+        """
+           Overrides __setitem__. If k has any callback functions defined they are
+           called from here
+           :param k: key to be set
+           :param v: value to be set
+        """
+        super().__setitem__(k, v)
+
+        # Call the callbacks
+        for cb in self.cbs.get(k, []):
+            try:
+                cb(k, v)
+            except:
+                logger.exception("BAD INTERNAL ERROR")
+
+class AutoVivification(dict):
+    """Implementation of perl's autovivification feature."""
+    def __getitem__(self, item):
+        try:
+            return dict.__getitem__(self, item)
+        except KeyError:
+            value = self[item] = type(self)()
+            return value
+
+hal_data = AutoVivification()
 
 {% for header in headers %}
 {% for cls in header.classes if 'ignore' not in cls.data %}
