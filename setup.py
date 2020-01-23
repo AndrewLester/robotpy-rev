@@ -127,7 +127,7 @@ class BuildExt(build_ext):
         build_ext.build_extensions(self)
 
 
-install_requires = ["wpilib>=2019.0.0,<2020.0.0"]
+install_requires = ["wpilib>=2020.0.0,<2021.0.0"]
 
 
 class Downloader:
@@ -314,10 +314,10 @@ if exists("/etc/natinst/share/scs_imagemetadata.ini") or _travis_build:
     # This doesn't actually work, as it needs to be installed before setup.py is ran
     # ... but we specify it
     # install_requires = ['pybind11>=1.7']
-    install_requires.append("robotpy-hal-roborio>=2019.0.0,<2020.0.0")
+    install_requires.append("robotpy-hal>=2020.0.0,<2021.0.0")
     cmdclass = {"build_ext": BuildExt}
 else:
-    install_requires.append("robotpy-hal-sim>=2019.0.0,<2020.0.0")
+    install_requires.append("robotpy-halsim-gui>=2020.0.0,<2021.0.0")
     ext_modules = None
     cmdclass = {}
 
