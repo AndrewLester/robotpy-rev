@@ -331,7 +331,6 @@ CANSparkMax:
         self.restoreFactoryDefaults()
         self.setMotorType(type)
         hal_data["CAN"]["sparkmax-%d" % deviceID] = self._hal_data
-        hal.report(hal.UsageReporting.kResourceType_RevSparkMaxCAN, deviceID)
 
         # Initialize conversion factors to 1
         self.getEncoder().setPositionConversionFactor(1)
