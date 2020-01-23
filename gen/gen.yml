@@ -5,6 +5,7 @@
 #
 
 - headers:
+    - rev/CANAnalog.h
     - rev/CANDigitalInput.h
     - rev/CANEncoder.h
     - rev/CANError.h
@@ -25,6 +26,8 @@
 # -> pybind generation
 
 - headers:
+    - rev/CANSensor.h
+    - rev/CANAnalog.h
     - rev/CANDigitalInput.h
     - rev/CANEncoder.h
     - rev/CANPIDController.h

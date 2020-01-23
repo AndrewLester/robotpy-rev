@@ -1,4 +1,23 @@
 ---
+CANSensor:
+  methods:
+    CANSensor:  # constructor
+      code: |
+          self._device = device
+CANAnalog:
+  __bases__: CANSensor
+  cpp_inherits: rev::CANSensor
+
+  methods:
+    CANAnalog:  # constructor
+      overloads:
+        "rev::CANAnalog&":
+          ignore: true
+        "rev::CANSparkMax&, AnalogMode":
+          code: |
+              self._device = device
+              self._mode = mode
+        
 CANDigitalInput:
   methods:
     CANDigitalInput:  # constructor
@@ -37,8 +56,18 @@ CANDigitalInput:
         retval = self._device._hal_data[param]
 
 CANEncoder:
+  __bases__: CANSensor
+  cpp_inherits: rev::CANSensor
+
   methods:
     CANEncoder:  # constructor
+      overloads:
+        "rev::CANEncoder&":
+          ignore: true
+        "rev::CANEncoder&&":
+          ignore: true
+        "rev::CANSparkMax&, rev::CANEncoder::AlternateEncoderType, int":
+          ignore: true 
       code: |
         self._device = device
         self._hal_data = device._hal_data
@@ -68,6 +97,9 @@ CANEncoder:
 CANPIDController:
   methods:
     CANPIDController:  # constructor
+      overloads:
+        "rev::CANPIDController&":
+          ignore: true
       code: |
         self._device = device
         self._hal_data = device._hal_data
@@ -128,6 +160,8 @@ CANPIDController:
       code: |
         assert 0 <= slotID <= 3
         self._hal_data["smartMotionAccelStrategy_%d" % slotID] = accelStrategy
+    SetFeedbackDevice:
+      ignore: true
     GetSmartMotionMaxVelocity:
       hook: pid_get
     GetSmartMotionMaxAccel:
@@ -185,18 +219,18 @@ CANSparkMaxLowLevel:
       get: ctrl_frame_period
     # TODO GetParameterType
     SetParameter:
-      overload: true
-    GetParameter:
-      overloads:
-        "rev::CANSparkMaxLowLevel::ConfigParameter, double&":
-          rename: getParameterDouble
-        "rev::CANSparkMaxLowLevel::ConfigParameter, uint32_t&":
-          rename: getParameterInt
-        "rev::CANSparkMaxLowLevel::ConfigParameter, int32_t&":
-          ignore: true
-        "rev::CANSparkMaxLowLevel::ConfigParameter, bool&":
-          rename: getParameterBoolean
-      ignore: true  # out param
+      ignore: true
+    #GetParameter:
+    #  overloads:
+    #    "rev::CANSparkMaxLowLevel::ConfigParameter, double&":
+    #      rename: getParameterDouble
+    #    "rev::CANSparkMaxLowLevel::ConfigParameter, uint32_t&":
+    #      rename: getParameterInt
+    #    "rev::CANSparkMaxLowLevel::ConfigParameter, int32_t&":
+    #      ignore: true
+    #    "rev::CANSparkMaxLowLevel::ConfigParameter, bool&":
+    #      rename: getParameterBoolean
+    #  ignore: true  # out param
     SetEncPosition:
       set: position
       invert: true
@@ -208,7 +242,7 @@ CANSparkMaxLowLevel:
         # config parameters in camel case (see CANSparkMaxLowLevel::ConfigParameter)
         self._hal_data.update({
             "motorType": MotorType.kBrushless,
-            "sensorType": SensorType.kHallSensor,
+            "sensorType": EncoderType.kHallSensor,
             "ctrlType": ControlType.kDutyCycle,
             "idleMode": IdleMode.kCoast,
             "polePairs": 7,
@@ -257,20 +291,6 @@ CANSparkMaxLowLevel:
             })
 
   sim_class_extra: |
-    def setParameter(
-        self,
-        parameterID: ConfigParameter,
-        value: typing.Union[float, bool, int]
-    ) -> ParameterStatus:
-        """
-        .. note:: This function works on a real robot, but has not yet
-                  been implemented in simulation mode. See :ref:`api_support`
-                  for more details.
-        """
-        assert isinstance(parameterID, ConfigParameter)
-        assert isinstance(value, (float, int))
-        raise NotImplementedError("setParameter not implemented in simulation (file a bug on github if you need it)")
-
     def _setpointCommand(
         self,
         value: float,

@@ -7,7 +7,6 @@ from ._impl import (
     ControlType,
     IdleMode,
     FaultID,
-    ConfigParameter,
     ParameterStatus,
     PeriodicFrame,
 )

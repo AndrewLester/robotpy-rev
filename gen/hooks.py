@@ -12,6 +12,7 @@ _annotations = {
     "double": "float",
     "char": "str",
     "bool": "bool",
+    "units::volt_t": "int",
     "rev::CANError": "CANError",
     "std::vector<uint8_t>": "typing.List[int]",
     "std::vector<uint8_t >": "typing.List[int]",
@@ -19,7 +20,7 @@ _annotations = {
     "void": "None",
 }
 
-_values = {"false": "False", "true": "True"}
+_values = {"false": "False", "true": "True", "CANEncoder::EncoderType": "EncoderType::", "ArbFFUnits": "ArbFFUnits::", "CANAnalog::AnalogMode": "AnalogMode::"}
 
 # fmt: off
 
@@ -168,8 +169,10 @@ def public_method_hook(fn, data):
 
         if "default" in p:
             p["default"] = str(p["default"])
-            p["x_pyann"] += " = " + _values.get(p["default"], p["default"])
-            p["x_pyarg"] += "=" + p["default"]
+            value_type, *value = p["default"].rsplit("::", 1)
+            value = value[0] if value else ''
+            p["x_pyann"] += " = " + (_values.get(value_type, value_type) + value).replace("::", ".")
+            p["x_pyarg"] += "=" + p["default"].replace("::", ".")
 
         if p["pointer"]:
             p["x_callname"] = "&%(x_callname)s" % p
@@ -224,7 +227,7 @@ def public_method_hook(fn, data):
         # Save some time in the common case -- set the error code to 0
         # if there's a single retval and the type is ErrorCode
         if fn["rtnType"] == "CANError":
-            x_param_checks.append("retval = CANError.kOK")
+            x_param_checks.append("retval = CANError.kOk")
 
     if len(x_rets) == 1 and x_rets[0]["x_type"] != "void":
         x_wrap_return = "return %s;" % x_rets[0]["name"]
